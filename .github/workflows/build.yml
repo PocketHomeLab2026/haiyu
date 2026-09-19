@@ -21,12 +21,14 @@ jobs:
       - name: 运行内置自检
         run: dotnet run --project .\src\Haiyu.DirectionalCompare\Haiyu.DirectionalCompare.csproj -c Release --no-build -- self-test
       - name: 构建 Windows 安装包
-        shell: powershell
+        shell: pwsh
         run: .\scripts\build-package.ps1
+      - name: 校验 Windows 安装包
+        shell: pwsh
+        run: .\tests\verify-package.ps1 -PackageDirectory .\artifacts\directional-compare-packages\haiyu-directional-compare-0.7.0-win-x64
       - name: 保存安装包构建产物
         uses: actions/upload-artifact@v4
         with:
           name: haiyu-directional-compare-win-x64
           path: artifacts/directional-compare-packages/*.zip
           if-no-files-found: error
-
