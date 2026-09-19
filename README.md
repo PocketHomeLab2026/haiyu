@@ -116,6 +116,8 @@
 - StableLM、OLMo2、Bloom；
 - Mamba、Falcon-Mamba；
 - 实验性 OPT、Falcon、BERT、T5 映射。
+- 接受定制模型定向对比
+- 有需求可以发邮件619599587@qq.com
 
 GGUF 可以识别结构，但当前版本不对量化块套用通用数值解码公式；相关数值路线会关闭并标记为 `fail-closed`。
 
