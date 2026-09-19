@@ -1,0 +1,32 @@
+name: build-and-self-test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: 构建源码
+        run: dotnet build .\src\Haiyu.DirectionalCompare\Haiyu.DirectionalCompare.csproj -c Release
+      - name: 运行内置自检
+        run: dotnet run --project .\src\Haiyu.DirectionalCompare\Haiyu.DirectionalCompare.csproj -c Release --no-build -- self-test
+      - name: 构建 Windows 安装包
+        shell: powershell
+        run: .\scripts\build-package.ps1
+      - name: 保存安装包构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: haiyu-directional-compare-win-x64
+          path: artifacts/directional-compare-packages/*.zip
+          if-no-files-found: error
+
