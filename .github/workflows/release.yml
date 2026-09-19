@@ -1,0 +1,80 @@
+name: publish-release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发布的版本标签，例如 v0.7.0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - name: 解析版本
+        id: version
+        shell: pwsh
+        env:
+          TAG_FROM_EVENT: ${{ github.ref_name }}
+          TAG_FROM_INPUT: ${{ inputs.tag }}
+        run: |
+          $tag = if ($env:TAG_FROM_INPUT) { $env:TAG_FROM_INPUT } else { $env:TAG_FROM_EVENT }
+          if ($tag -notmatch '^v(\d+\.\d+\.\d+)$') { throw "版本标签必须形如 v0.7.0，实际为：$tag" }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$($Matches[1])" >> $env:GITHUB_OUTPUT
+      - name: 构建 Windows 安装包
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: .\scripts\build-package.ps1 -Version $env:RELEASE_VERSION
+      - name: 校验 Windows 安装包
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: .\tests\verify-package.ps1 -PackageDirectory ".\artifacts\directional-compare-packages\haiyu-directional-compare-$env:RELEASE_VERSION-win-x64"
+      - name: 生成 SHA-256 校验文件
+        id: package
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $root = Join-Path $env:GITHUB_WORKSPACE "artifacts\directional-compare-packages"
+          $zip = Get-Item (Join-Path $root "haiyu-directional-compare-$env:RELEASE_VERSION-win-x64.zip")
+          $checksums = Join-Path $root 'SHA256SUMS.txt'
+          $hash = (Get-FileHash -LiteralPath $zip.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $($zip.Name)" | Set-Content -LiteralPath $checksums -Encoding utf8NoBOM
+          "zip=$($zip.FullName)" >> $env:GITHUB_OUTPUT
+          "checksums=$checksums" >> $env:GITHUB_OUTPUT
+      - name: 创建 GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          ZIP_PATH: ${{ steps.package.outputs.zip }}
+          CHECKSUMS_PATH: ${{ steps.package.outputs.checksums }}
+        run: |
+          $notes = @"
+          ## 海域模型定向对比器 $env:RELEASE_VERSION
+
+          - Windows x64 自包含安装包
+          - 本地只读、默认不联网、不调用 GPU
+          - 包含安装包清单和 SHA-256 校验文件
+          - 未知结构和不安全数值路线采用 fail-closed
+
+          详细说明请查看仓库 README。
+          "@
+          $notesPath = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          $notes | Set-Content -LiteralPath $notesPath -Encoding utf8NoBOM
+          gh release create $env:RELEASE_TAG $env:ZIP_PATH $env:CHECKSUMS_PATH --repo $env:GITHUB_REPOSITORY --title "海域模型定向对比器 $env:RELEASE_VERSION" --notes-file $notesPath

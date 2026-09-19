@@ -1,0 +1,25 @@
+{
+  "schema": "haiyu-directional-self-test/v1",
+  "version": "0.7.0",
+  "ok": true,
+  "passed": 16,
+  "total": 16,
+  "highlights": [
+    "qwen3-forward-direction",
+    "mamba-native-order",
+    "phi3small-blocksparse-native-order",
+    "unknown-architecture-fails-closed",
+    "directed-payload-sample-is-read-only-and-pruned",
+    "directional-ab-uses-identical-sample-windows",
+    "runtime-organ-falls-back-on-directional-read-error",
+    "runtime-organ-fails-closed-on-readiness-identity-mismatch",
+    "robustness-audit-covers-scale-noise-and-faults"
+  ],
+  "boundaries": {
+    "fullWeightLoaded": false,
+    "gpuUsed": false,
+    "networkUsed": false,
+    "originalWeightsModified": false,
+    "authority": "structural-direction-only; semantic meaning and answer correctness remain unproven"
+  }
+}

@@ -1,0 +1,38 @@
+name: 模型适配请求
+description: 请求支持新的模型架构或张量映射
+title: "[模型适配] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请只提交脱敏后的配置字段，不要上传模型权重或私有下载链接。
+  - type: input
+    id: model_type
+    attributes:
+      label: model_type
+      placeholder: 例如 qwen3
+    validations:
+      required: true
+  - type: input
+    id: architectures
+    attributes:
+      label: architectures
+      placeholder: 例如 Qwen3ForCausalLM
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: 脱敏配置片段
+      description: 请删除路径、令牌、业务数据和其他敏感字段。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 希望支持的定向路线
+      placeholder: 例如 embedding 到 lm_head
+    validations:
+      required: true

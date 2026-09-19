@@ -1,0 +1,38 @@
+name: 问题反馈
+description: 报告可复现的安装、扫描、对比或打包问题
+title: "[问题] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先确认没有提交模型权重、访问令牌、私有路径或其他敏感信息。
+  - type: input
+    id: version
+    attributes:
+      label: 工具版本
+      placeholder: 例如 0.7.0 或提交 SHA
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows 版本
+      placeholder: 例如 Windows 11 24H2
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请给出最小复现步骤和实际结果。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 脱敏日志
+      description: 可附 self-test 输出、错误信息和 fail-closed 原因。
+    validations:
+      required: true
