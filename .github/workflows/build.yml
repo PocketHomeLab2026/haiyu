@@ -12,8 +12,8 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
       - name: 构建源码
@@ -27,7 +27,7 @@ jobs:
         shell: pwsh
         run: .\tests\verify-package.ps1 -PackageDirectory .\artifacts\directional-compare-packages\haiyu-directional-compare-0.7.0-win-x64
       - name: 保存安装包构建产物
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: haiyu-directional-compare-win-x64
           path: artifacts/directional-compare-packages/*.zip
